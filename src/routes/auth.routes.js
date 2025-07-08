@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('./../controllers/auth/auth.controller');
+const authMiddleware = require('../middleware/auth.middleware');
 
 /**
  * @swagger
@@ -174,5 +175,42 @@ router.patch('/activate/:id', authController.activateStaff);
  *         description: Internal server error
  */
 router.patch('/reset-password/:id', authController.resetPassword);
+
+/**
+ * @swagger
+ * /api/auth/me:
+ *   get:
+ *     summary: Get current user's profile
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: User profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 firstName:
+ *                   type: string
+ *                 lastName:
+ *                   type: string
+ *                 idNumber:
+ *                   type: string
+ *                 username:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *                 phonenumber:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized - missing or invalid token
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/me', authMiddleware(), authController.getMe);
 
 module.exports = router;

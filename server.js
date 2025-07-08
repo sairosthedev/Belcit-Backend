@@ -42,7 +42,10 @@ connectDB();
 
 // Middleware
 app.use(express.json());
-app.use(cors()); // Allow CORS for all origins
+app.use(cors({
+  origin: 'http://localhost:3000', // your frontend URL
+  credentials: true,              // allow cookies/session
+}));
 app.use(helmet());
 app.use(morgan("dev"));
 
