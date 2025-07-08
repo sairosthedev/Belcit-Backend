@@ -46,6 +46,11 @@ app.use(cors()); // Allow CORS for all origins
 app.use(helmet());
 app.use(morgan("dev"));
 
+// Add a root route for health check or friendly message
+app.get('/', (req, res) => {
+  res.send('BELCIT Supermarket Backend is running! Visit /api for API endpoints.');
+});
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/vendors", vendorRoutes);
