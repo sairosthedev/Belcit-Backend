@@ -150,7 +150,10 @@ exports.resetPassword = async (req, res, next) => {
   }
 };
 
-exports.getMe = (req, res) => {
+exports.getMe = async (req, res) => {
   if (!req.user) return res.status(401).json({ message: 'Not authenticated' });
-  res.json(req.user);
+  const staff = await Staff.findById(req.user.userId).lean();
+  if (!staff) return res.status(404).json({ message: 'User not found' });
+  const { password, ...userData } = staff;
+  res.json(userData);
 };
