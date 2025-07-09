@@ -10,7 +10,7 @@ const saleItemSchema = new mongoose.Schema({
 const saleSchema = new mongoose.Schema({
   items: [saleItemSchema],
   total: { type: Number, required: true },
-  paymentType: { type: String, enum: ["cash", "card", "mobile", "other"], required: true },
+  paymentType: { type: String, enum: ["cash", "swipe", "ecocash", "innbucks", "bank-transfer"], required: true },
   customer: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
   cashier: { type: mongoose.Schema.Types.ObjectId, ref: "Staff", required: true },
   date: { type: Date, default: Date.now },

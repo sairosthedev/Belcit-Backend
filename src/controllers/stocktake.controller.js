@@ -1,18 +1,25 @@
 const Stocktake = require("../models/stocktake.model");
 const Product = require("../models/product.model");
+const InventoryTransaction = require("../models/inventory-transaction.model");
 
 exports.submitStocktake = async (req, res) => {
   try {
-    const { productId, counted, countedBy } = req.body;
+    const { productId, counted, countedBy, reason } = req.body;
+    if (counted < 0) return res.status(400).json({ error: "Counted stock cannot be negative." });
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ error: "Product not found" });
     const discrepancy = counted - product.stock;
+    // Require a reason if there is a discrepancy
+    if (discrepancy !== 0 && (!reason || reason.trim() === "")) {
+      return res.status(400).json({ error: "A reason is required for discrepancies." });
+    }
     const stocktake = new Stocktake({
       product: productId,
       counted,
       system: product.stock,
       discrepancy,
       countedBy,
+      date: new Date(),
       confirmed: false,
     });
     await stocktake.save();
@@ -47,8 +54,19 @@ exports.confirmAdjustment = async (req, res) => {
     if (stocktake.confirmed) return res.status(400).json({ error: "Already confirmed" });
     // Update product stock
     const product = await Product.findById(stocktake.product._id);
+    const oldStock = product.stock;
     product.stock = stocktake.counted;
     await product.save();
+    // Log inventory transaction if stock changed
+    if (oldStock !== stocktake.counted) {
+      await InventoryTransaction.create({
+        product: product._id,
+        type: "adjust",
+        quantity: stocktake.counted,
+        reason: `Stocktake adjustment (was ${oldStock}, now ${stocktake.counted})`,
+        user: stocktake.countedBy,
+      });
+    }
     stocktake.confirmed = true;
     await stocktake.save();
     res.status(200).json(stocktake);

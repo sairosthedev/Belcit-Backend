@@ -1,30 +1,77 @@
-const axios = require('axios');
+// Usage: node create-admin-user.js
+require('dotenv').config();
+const mongoose = require('mongoose');
+const connectDB = require('./src/config/database');
+const Staff = require('./src/models/staff.model');
 
-async function createAdminUser() {
-  try {
-    const response = await axios.post('http://localhost:5000/api/auth/register', {
-      firstName: 'Admin',
-      lastName: 'User',
-      idNumber: 'A1234567',
-      username: 'admin',
-      password: 'password123',
-      role: 'superAdmin',
-      phonenumber: '1234567890',
-      email: 'admin@example.com'
-    });
-    console.log('User created:', response.data);
-  } catch (error) {
-    if (error.response) {
-      console.error('Error response:', error.response.data);
-      console.error('Status:', error.response.status);
-      console.error('Headers:', error.response.headers);
-    } else if (error.request) {
-      console.error('No response received:', error.request);
-    } else {
-      console.error('Error setting up request:', error.message);
-    }
-    console.error('Full error object:', error);
+const users = [
+  {
+    firstName: 'Admin',
+    lastName: 'User',
+    idNumber: 'A0001',
+    username: 'admin',
+    password: 'admin123',
+    role: 'admin',
+    phonenumber: '0712345678',
+    email: 'admin@example.com',
+    status: 'active',
+  },
+  {
+    firstName: 'Manager',
+    lastName: 'User',
+    idNumber: 'M0001',
+    username: 'manager',
+    password: 'manager123',
+    role: 'manager',
+    phonenumber: '0723456789',
+    email: 'manager@example.com',
+    status: 'active',
+  },
+  {
+    firstName: 'Cashier',
+    lastName: 'User',
+    idNumber: 'C0001',
+    username: 'cashier',
+    password: 'cashier123',
+    role: 'cashier',
+    phonenumber: '0734567890',
+    email: 'cashier@example.com',
+    status: 'active',
+  },
+  {
+    firstName: 'Stock',
+    lastName: 'Clerk',
+    idNumber: 'S0001',
+    username: 'stockclerk',
+    password: 'stockclerk123',
+    role: 'stockClerk',
+    phonenumber: '0745678901',
+    email: 'stockclerk@example.com',
+    status: 'active',
+  },
+  {
+    firstName: 'Super',
+    lastName: 'Admin',
+    idNumber: 'SA0001',
+    username: 'superadmin',
+    password: 'superadmin123',
+    role: 'superAdmin',
+    phonenumber: '0756789012',
+    email: 'superadmin@example.com',
+    status: 'active',
+  },
+];
+
+async function resetUsers() {
+  await connectDB();
+  await Staff.deleteMany({});
+  console.log('All users deleted.');
+  for (const user of users) {
+    await Staff.create(user);
+    console.log(`Created user: ${user.username} (${user.role})`);
   }
+  await mongoose.disconnect();
+  console.log('Done.');
 }
 
-createAdminUser(); 
+resetUsers(); 

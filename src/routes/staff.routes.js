@@ -28,7 +28,7 @@ const uploadImageController = require('../controllers/staff/uploadImage.controll
  *       500:
  *         description: Internal server error
  */
-router.get('/', auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT]), getAllStaff);
+router.get('/', auth([ROLES.ADMIN, ROLES.MANAGER, ROLES.SUPER_ADMIN]), getAllStaff);
 
 /**
  * @swagger
@@ -53,7 +53,7 @@ router.get('/', auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT]), getAllStaff);
  *       500:
  *         description: Internal server error
  */
-router.get('/:id', auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT, ROLES.DATA_CAPTURER]), getStaffById);
+router.get('/:id', auth([ROLES.ADMIN, ROLES.MANAGER, ROLES.SUPER_ADMIN]), getStaffById);
 
 /**
  * @swagger
@@ -94,7 +94,7 @@ router.get('/:id', auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT, ROLES.DATA_CAPTURE
  *       500:
  *         description: Internal server error
  */
-router.put('/update/:id', auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT]), updateStaff);
+router.put('/update/:id', auth([ROLES.ADMIN, ROLES.MANAGER, ROLES.SUPER_ADMIN]), updateStaff);
 
 /**
  * @swagger
@@ -119,7 +119,7 @@ router.put('/update/:id', auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT]), updateSta
  *       500:
  *         description: Internal server error
  */
-router.delete('/delete/:id', auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT]), deleteStaff);
+router.delete('/delete/:id', auth([ROLES.ADMIN, ROLES.MANAGER, ROLES.SUPER_ADMIN]), deleteStaff);
 
 /**
  * @swagger
@@ -151,7 +151,7 @@ router.delete('/delete/:id', auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT]), delete
  *       500:
  *         description: Failed to upload image
  */
-router.post('/upload-image', auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT]), uploadImageController.uploadFile);
+router.post('/upload-image', auth([ROLES.ADMIN, ROLES.MANAGER, ROLES.SUPER_ADMIN]), uploadImageController.uploadFile);
 
 /**
  * @swagger
@@ -185,6 +185,6 @@ router.post('/upload-image', auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT]), upload
  *       500:
  *         description: Failed to update image
  */
-router.put('/update-image', auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT]), uploadImageController.updateImage);
+router.put('/update-image', auth([ROLES.ADMIN, ROLES.MANAGER, ROLES.SUPER_ADMIN]), uploadImageController.updateImage);
 
 module.exports = router;

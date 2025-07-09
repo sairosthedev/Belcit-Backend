@@ -29,7 +29,7 @@ const ROLES = require("../config/roles");
  *       500:
  *         description: Failed to start shift
  */
-router.post('/', auth([ROLES.CASHIER, ROLES.ACCOUNTANT, ROLES.SUPER_ADMIN]), shiftController.startShift);
+router.post('/', auth([ROLES.CASHIER, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), shiftController.startShift);
 
 /**
  * @swagger
@@ -87,7 +87,7 @@ router.post('/', auth([ROLES.CASHIER, ROLES.ACCOUNTANT, ROLES.SUPER_ADMIN]), shi
  *       500:
  *         description: Failed to end shift
  */
-router.put('/:shiftId', auth([ROLES.ACCOUNTANT, ROLES.SUPER_ADMIN]), shiftController.endShift);
+router.put('/:shiftId', auth([ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), shiftController.endShift);
 
 /**
  * @swagger
@@ -103,7 +103,7 @@ router.put('/:shiftId', auth([ROLES.ACCOUNTANT, ROLES.SUPER_ADMIN]), shiftContro
  *       500:
  *         description: Failed to retrieve shifts
  */
-router.get('/', auth([ROLES.ACCOUNTANT, ROLES.SUPER_ADMIN]), shiftController.getAllShifts);
+router.get('/', auth([ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), shiftController.getAllShifts);
 
 /**
  * @swagger
@@ -132,7 +132,7 @@ router.get('/', auth([ROLES.ACCOUNTANT, ROLES.SUPER_ADMIN]), shiftController.get
  *       500:
  *         description: Failed to retrieve shifts
  */
-router.get('/date-range', auth([ROLES.ACCOUNTANT, ROLES.SUPER_ADMIN]), shiftController.getShiftsByDateRange);
+router.get('/date-range', auth([ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), shiftController.getShiftsByDateRange);
 
 /**
  * @swagger
@@ -155,6 +155,6 @@ router.get('/date-range', auth([ROLES.ACCOUNTANT, ROLES.SUPER_ADMIN]), shiftCont
  *       500:
  *         description: Failed to retrieve shifts
  */
-router.get('/cashier/:cashierId', auth([ROLES.ACCOUNTANT, ROLES.SUPER_ADMIN]), shiftController.getShiftsByCashierId);
+router.get('/cashier/:cashierId', auth([ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), shiftController.getShiftsByCashierId);
 
 module.exports = router;

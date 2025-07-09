@@ -2,6 +2,18 @@ const Product = require("../models/product.model");
 
 exports.createProduct = async (req, res) => {
   try {
+    const { name, barcode, category, unit, price, stock } = req.body;
+    // Validate required fields
+    if (!name || !category || !unit || price == null || stock == null) {
+      return res.status(400).json({ error: "Missing required fields: name, category, unit, price, stock" });
+    }
+    // Check for duplicate barcode if provided
+    if (barcode) {
+      const existing = await Product.findOne({ barcode });
+      if (existing) {
+        return res.status(400).json({ error: "A product with this barcode already exists." });
+      }
+    }
     const product = new Product(req.body);
     await product.save();
     res.status(201).json(product);
@@ -12,7 +24,12 @@ exports.createProduct = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const { name } = req.query;
+    let query = {};
+    if (name) {
+      query.name = { $regex: name, $options: "i" };
+    }
+    const products = await Product.find(query);
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -31,7 +31,7 @@ const staffSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['superAdmin', 'accountant', 'cpuOfficer', 'dataCapturer', 'cashier'],
+    enum: ['superAdmin', 'cashier', 'manager', 'stockClerk', 'admin'],
     required: true
   },
   phonenumber: {

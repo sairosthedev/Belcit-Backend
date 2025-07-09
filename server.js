@@ -89,15 +89,15 @@ const swaggerUi = require("swagger-ui-express");
 app.use(errorHandler);
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 const options = {
   definition: {
     openapi: "3.1.0",
     info: {
-      title: "Mbare Marketplace API Documentation",
+      title: "BELCIT TRADING Supermarket System API Documentation",
       version: "1.0.0",
-      description: "API documentation for Mbare Marketplace Management System",
+      description: "API documentation for BELCIT TRADING Supermarket System",
     },
     components: {
       securitySchemes: {

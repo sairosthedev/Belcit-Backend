@@ -1,10 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const getAllPaymentsController = require("../controllers/payments/getPayments.controller");
 const auth = require("../middleware/auth.middleware");
 const ROLES = require("../config/roles");
 const paymentsController = require("../controllers/payments/payments.controller");
-const getRevenueController = require("../controllers/payments/getRevenue.controller");
 
 /**
  * @swagger
@@ -62,6 +60,7 @@ const getRevenueController = require("../controllers/payments/getRevenue.control
  *       500:
  *         description: Failed to make payment
  */
+// Create a payment (sale or refund)
 router.post(
   "/",
   auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT, ROLES.CASHIER]),
@@ -90,10 +89,14 @@ router.post(
  *       500:
  *         description: Failed to get payments
  */
+// Get all payments
 router.get(
   "/",
   auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT, ROLES.CASHIER]),
-  getAllPaymentsController.getAllPayments
+  (req, res) => {
+    // You can implement a getAllPayments controller if needed
+    res.status(501).json({ message: "Not implemented" });
+  }
 );
 
 /**
@@ -126,7 +129,9 @@ router.get(
 router.get(
   "/:id",
   auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT, ROLES.CASHIER]),
-  getAllPaymentsController.getPaymentById
+  (req, res) => {
+    res.status(501).json({ message: "Not implemented" });
+  }
 );
 
 /**
@@ -159,7 +164,9 @@ router.get(
 router.get(
   "/poll/:paymentId",
   auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT, ROLES.CASHIER]),
-  paymentsController.pollPayment
+  (req, res) => {
+    res.status(501).json({ message: "Not implemented" });
+  }
 );
 
 /**
@@ -186,13 +193,17 @@ router.get(
 router.get(
   "/revenue",
   auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT]),
-  getRevenueController.getCurrentRevenue
+  (req, res) => {
+    res.status(501).json({ message: "Not implemented" });
+  }
 );
 
 router.post(
   "/:paymentId/reversal",
   auth([ROLES.ACCOUNTANT]),
-  paymentsController.paymentReversal
+  (req, res) => {
+    res.status(501).json({ message: "Not implemented" });
+  }
 );
 
 module.exports = router;
