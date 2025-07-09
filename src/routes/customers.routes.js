@@ -13,7 +13,7 @@ const {
  */
 router.get(
   "/",
-  auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT, ROLES.CASHIER]),
+  auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT, ROLES.CASHIER, ROLES.ADMIN]),
   getAllCustomers
 );
 
@@ -22,7 +22,7 @@ router.get(
  */
 router.get(
   "/:id",
-  auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT, ROLES.CASHIER]),
+  auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT, ROLES.CASHIER, ROLES.ADMIN]),
   findCustomerById
 );
 
@@ -31,7 +31,7 @@ router.get(
  */
 router.get(
   "/:customerId/account-statement",
-  auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT, ROLES.CASHIER]),
+  auth([ROLES.SUPER_ADMIN, ROLES.ACCOUNTANT, ROLES.CASHIER, ROLES.ADMIN]),
   getCustomerAccountStatement
 );
 

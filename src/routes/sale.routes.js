@@ -7,6 +7,7 @@ const ROLES = require("../config/roles");
 router.post("/", auth([ROLES.CASHIER, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), salesController.createSale);
 router.get("/", auth([ROLES.CASHIER, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), salesController.getSales);
 router.get("/daily", auth([ROLES.CASHIER, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), salesController.getDailySales);
+router.get("/top-products", auth([ROLES.CASHIER, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), salesController.getTopProducts);
 router.get("/:id", auth([ROLES.CASHIER, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), salesController.getSaleById);
 router.get("/:id/receipt", auth([ROLES.CASHIER, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), salesController.getSaleReceipt);
 

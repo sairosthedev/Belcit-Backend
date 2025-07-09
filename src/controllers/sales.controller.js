@@ -58,8 +58,12 @@ exports.getDailySales = async (req, res) => {
 
 exports.getSaleReceipt = async (req, res) => {
   try {
+    console.log('Looking for sale with ID:', req.params.id);
     const sale = await Sale.findById(req.params.id).populate("items.product cashier customer");
-    if (!sale) return res.status(404).send("Sale not found");
+    if (!sale) {
+      console.log('Sale not found!');
+      return res.status(404).send("Sale not found");
+    }
     let itemsHtml = sale.items.map(item => `
       <tr>
         <td>${item.product.name}</td>
@@ -93,4 +97,40 @@ exports.getSaleReceipt = async (req, res) => {
   } catch (error) {
     res.status(500).send(error.message);
   }
-}; 
+};
+
+exports.getTopProducts = async (req, res) => {
+  try {
+    const topProducts = await Sale.aggregate([
+      { $unwind: "$items" },
+      { $group: {
+          _id: "$items.product",
+          totalSold: { $sum: "$items.quantity" }
+        }
+      },
+      { $sort: { totalSold: -1 } },
+      { $limit: 5 },
+      { $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      { $unwind: "$product" },
+      { $project: {
+          _id: 0,
+          productId: "$product._id",
+          name: "$product.name",
+          category: "$product.category",
+          unit: "$product.unit",
+          price: "$product.price",
+          totalSold: 1
+        }
+      }
+    ]);
+    res.status(200).json(topProducts);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
