@@ -26,8 +26,23 @@ exports.createSale = async (req, res) => {
 
 exports.getSales = async (req, res) => {
   try {
-    const sales = await Sale.find().populate("items.product").sort({ date: -1 });
-    res.status(200).json(sales);
+    // Pagination parameters
+    const page = parseInt(req.query.page) > 0 ? parseInt(req.query.page) : 1;
+    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 10;
+    const skip = (page - 1) * limit;
+
+    // Get total count for pagination
+    const total = await Sale.countDocuments();
+
+    const sales = await Sale.find()
+      .populate("items.product")
+      .populate("cashier")
+      .populate("customer")
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({ sales, total, page, limit });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -49,7 +64,10 @@ exports.getDailySales = async (req, res) => {
     today.setHours(0,0,0,0);
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-    const sales = await Sale.find({ date: { $gte: today, $lt: tomorrow } }).populate("items.product");
+    const sales = await Sale.find({ date: { $gte: today, $lt: tomorrow } })
+      .populate("items.product")
+      .populate("cashier")
+      .populate("customer");
     res.status(200).json(sales);
   } catch (error) {
     res.status(500).json({ error: error.message });

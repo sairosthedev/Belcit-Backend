@@ -7,8 +7,7 @@ const connectDB = require("./src/config/database");
 const errorHandler = require("./src/middleware/error.middleware");
 
 // Import routes
-const authRoutes = require("./src/routes/auth.routes");
-const vendorRoutes = require("./src/routes/vendor.routes");
+const authRoutes = require("./src/routes/auth.routes");;
 const staffRoutes = require("./src/routes/staff.routes");
 const ticketRoutes = require("./src/routes/ticket.routes");
 const settingRoutes = require("./src/routes/setting.routes");
@@ -33,6 +32,7 @@ const purchaseRoutes = require("./src/routes/purchase.routes");
 const expenseRoutes = require("./src/routes/expense.routes");
 const reportRoutes = require("./src/routes/report.routes");
 const stocktakeRoutes = require("./src/routes/stocktake.routes");
+const vendorsRoutes = require("./src/routes/vendors.routes");
 
 // Initialize express
 const app = express();
@@ -56,7 +56,6 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/vendors", vendorRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/settings", settingRoutes);
@@ -81,6 +80,7 @@ app.use("/api/purchases", purchaseRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/stocktakes", stocktakeRoutes);
+app.use("/api/vendors", vendorsRoutes);
 
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");

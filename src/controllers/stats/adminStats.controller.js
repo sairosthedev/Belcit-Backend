@@ -1,7 +1,7 @@
 const Payment = require('../../models/payment.model');
 const Ticket = require('../../models/ticket.model');
 const Staff = require('../../models/staff.model');
-const Vendor = require('../../models/vendor.model');
+// Removed: const Vendor = require('../../models/vendor.model');
 // Removed: const {Stall} = require('../../models/stall.model');
 // Removed: const Farmer = require('../../models/farmer.model');
 
@@ -18,17 +18,14 @@ const getAdminDashboardStats = async (req, res) => {
         // Get total tickets
         const totalTickets = await Ticket.countDocuments();
 
-        // Get total vendors
-        const totalVendors = await Vendor.countDocuments();
-
+        // Removed: Get total vendors
         // Removed: Get total stalls
         // Removed: Get total farmers
 
         return res.status(200).json({
             totalStaff,
             totalPayments,
-            totalTickets,
-            totalVendors
+            totalTickets
         });
     } catch (error) {
         console.error(error);

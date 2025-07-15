@@ -152,4 +152,129 @@ exports.expenseBreakdown = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+exports.topProducts = async (req, res) => {
+  try {
+    const { start, end, limit = 5 } = req.query;
+    const match = {};
+    if (start && end) {
+      match.date = { $gte: new Date(start), $lte: new Date(end) };
+    }
+    // Aggregate sales by product
+    const top = await Sale.aggregate([
+      { $match: match },
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.product",
+          sold: { $sum: "$items.quantity" },
+          revenue: { $sum: "$items.total" }
+        }
+      },
+      { $sort: { sold: -1 } },
+      { $limit: parseInt(limit) },
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      { $unwind: "$product" },
+      {
+        $project: {
+          name: "$product.name",
+          sold: 1,
+          revenue: 1
+        }
+      }
+    ]);
+    res.json(top);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Sales Over Time (daily totals)
+exports.salesOverTime = async (req, res) => {
+  try {
+    const { start, end } = req.query;
+    const match = {};
+    if (start && end) {
+      match.date = { $gte: new Date(start), $lte: new Date(end) };
+    }
+    const sales = await Sale.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+          sales: { $sum: "$total" }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+    res.json(sales.map(d => ({ date: d._id, sales: d.sales })));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Expenses Over Time (daily totals)
+exports.expensesOverTime = async (req, res) => {
+  try {
+    const { start, end } = req.query;
+    const match = {};
+    if (start && end) {
+      match.date = { $gte: new Date(start), $lte: new Date(end) };
+    }
+    const expenses = await Expense.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+          expenses: { $sum: "$amount" }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+    res.json(expenses.map(d => ({ date: d._id, expenses: d.expenses })));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Sales by Category
+exports.salesByCategory = async (req, res) => {
+  try {
+    const { start, end } = req.query;
+    const match = {};
+    if (start && end) {
+      match.date = { $gte: new Date(start), $lte: new Date(end) };
+    }
+    const sales = await Sale.aggregate([
+      { $match: match },
+      { $unwind: "$items" },
+      {
+        $lookup: {
+          from: "products",
+          localField: "items.product",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      { $unwind: "$product" },
+      {
+        $group: {
+          _id: "$product.category",
+          revenue: { $sum: "$items.total" }
+        }
+      },
+      { $sort: { revenue: -1 } }
+    ]);
+    res.json(sales.map(d => ({ category: d._id, revenue: d.revenue })));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }; 

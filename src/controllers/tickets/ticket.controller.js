@@ -2,7 +2,6 @@ const Ticket = require("../../models/ticket.model");
 const Staff = require("../../models/staff.model");
 const Customer = require("../../models/customer.model");
 const LineItem = require("../../models/line-items.model");
-const Vendor = require("../../models/vendor.model"); // Import Vendor model
 const { PAYMENT_TYPES_ENUM } = require("../../config/payment-type");
 const mongoose = require("mongoose");
 const { generateBill } = require("../tickets/billing.controller");
