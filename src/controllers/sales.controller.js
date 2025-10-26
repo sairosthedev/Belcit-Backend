@@ -1,5 +1,6 @@
 const Sale = require("../models/sale.model");
 const Product = require("../models/product.model");
+const Customer = require("../models/customer.model");
 
 exports.createSale = async (req, res) => {
   try {
@@ -18,6 +19,30 @@ exports.createSale = async (req, res) => {
     }
     const sale = new Sale({ items, total, paymentType, customer, cashier });
     await sale.save();
+
+    // Award loyalty points if customer is provided
+    if (customer) {
+      try {
+        const customerRecord = await Customer.findById(customer);
+        if (customerRecord) {
+          // Award 1 point per dollar spent (configurable)
+          const pointsEarned = Math.floor(total);
+          
+          customerRecord.loyaltyPoints = (customerRecord.loyaltyPoints || 0) + pointsEarned;
+          customerRecord.totalSpent = (customerRecord.totalSpent || 0) + total;
+          customerRecord.visitCount = (customerRecord.visitCount || 0) + 1;
+          customerRecord.lastVisit = new Date();
+          
+          await customerRecord.save();
+          
+          console.log(`Awarded ${pointsEarned} loyalty points to customer ${customerRecord.firstName}`);
+        }
+      } catch (loyaltyError) {
+        console.error('Error awarding loyalty points:', loyaltyError);
+        // Don't fail the sale if loyalty points fail
+      }
+    }
+
     res.status(201).json(sale);
   } catch (error) {
     res.status(400).json({ error: error.message });

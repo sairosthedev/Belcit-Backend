@@ -33,6 +33,7 @@ const expenseRoutes = require("./src/routes/expense.routes");
 const reportRoutes = require("./src/routes/report.routes");
 const stocktakeRoutes = require("./src/routes/stocktake.routes");
 const vendorsRoutes = require("./src/routes/vendors.routes");
+const attendanceRoutes = require("./src/routes/attendance.routes");
 
 // Initialize express
 const app = express();
@@ -111,6 +112,7 @@ app.use("/api/expenses", expenseRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/stocktakes", stocktakeRoutes);
 app.use("/api/vendors", vendorsRoutes);
+app.use("/api/attendance", attendanceRoutes);
 
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");

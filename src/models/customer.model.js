@@ -25,6 +25,22 @@ const customerSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "ControlAccount",
   },
+  
+  // Loyalty Program Fields
+  loyaltyPoints: { type: Number, default: 0 },
+  totalSpent: { type: Number, default: 0 },
+  visitCount: { type: Number, default: 0 },
+  lastVisit: { type: Date },
+  
+  // Customer Preferences
+  marketingOptIn: { type: Boolean, default: true },
+  smsOptIn: { type: Boolean, default: false },
+  emailOptIn: { type: Boolean, default: true },
+  
+  // Feedback tracking
+  rating: { type: Number, min: 1, max: 5 },
+  feedback: { type: String },
+  feedbackDate: { type: Date },
 });
 
 customerSchema.plugin(aggregatePaginate);

@@ -48,6 +48,22 @@ const staffSchema = new mongoose.Schema({
     enum: ['active', 'inactive'],
     default: 'active'
   },
+  
+  // Salary Management
+  salary: { type: Number, default: 0 },
+  commissionRate: { type: Number, default: 0 }, // Percentage
+  paymentMethod: {
+    type: String,
+    enum: ['bank', 'cash', 'mobile'],
+    default: 'bank'
+  },
+  bankAccount: { type: String },
+  
+  // Employment Details
+  hireDate: { type: Date, default: Date.now },
+  department: { type: String },
+  position: { type: String },
+  
 }, { timestamps: true });
 
 staffSchema.pre('save', async function(next) {
