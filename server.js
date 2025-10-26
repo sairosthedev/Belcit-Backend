@@ -42,10 +42,40 @@ connectDB();
 
 // Middleware
 app.use(express.json());
+
+// CORS configuration to allow requests from Vercel frontend and localhost
+const allowedOrigins = [
+  'http://localhost:3000',              // Local development
+  'http://localhost:3001',
+  'https://belcit-frontend.vercel.app/',             
+  /^https:\/\/.*\.vercel\.app$/,       // All Vercel preview deployments
+  /^https:\/\/.*\.render\.com$/,       // All Render frontend deployments
+  process.env.FRONTEND_URL,             // Custom frontend URL from env
+].filter(Boolean); // Remove any undefined values
+
 app.use(cors({
-  origin: 'http://localhost:3000', // your frontend URL
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is allowed
+    if (allowedOrigins.some(allowed => {
+      if (typeof allowed === 'string') {
+        return origin === allowed;
+      }
+      return allowed.test(origin);
+    })) {
+      callback(null, true);
+    } else {
+      console.log(`CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,              // allow cookies/session
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
 app.use(helmet());
 app.use(morgan("dev"));
 
