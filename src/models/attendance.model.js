@@ -34,6 +34,15 @@ const attendanceSchema = new mongoose.Schema({
   overtime: {
     type: Number,
     default: 0
+  },
+  sessionId: {
+    type: String,
+    required: true,
+    default: () => new mongoose.Types.ObjectId().toString()
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   }
 }, { timestamps: true });
 

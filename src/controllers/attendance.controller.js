@@ -1,46 +1,63 @@
 const Attendance = require('../models/attendance.model');
 const Staff = require('../models/staff.model');
+const mongoose = require('mongoose');
 
 // Check in for staff
 exports.checkIn = async (req, res) => {
   try {
     const { staffId, notes } = req.body;
+    console.log('Check-in request for staffId:', staffId);
+    
+    if (!staffId) {
+      console.error('No staffId provided in check-in request');
+      return res.status(400).json({ message: 'Staff ID is required' });
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Check if already checked in today
-    const existingAttendance = await Attendance.findOne({
+    // Check if there's an active session today (not checked out)
+    const activeAttendance = await Attendance.findOne({
       staff: staffId,
-      date: { $gte: today }
+      date: { $gte: today },
+      checkOut: null,
+      isActive: true
     });
 
-    if (existingAttendance) {
+    if (activeAttendance) {
+      console.log('Staff already has an active session today:', staffId);
       return res.status(400).json({
         message: 'Already checked in today',
-        attendance: existingAttendance
+        attendance: activeAttendance
       });
     }
 
     const staff = await Staff.findById(staffId);
     if (!staff) {
+      console.error('Staff not found:', staffId);
       return res.status(404).json({ message: 'Staff not found' });
     }
 
+    console.log('Creating new attendance session for staff:', staff.firstName, staff.lastName);
     const attendance = await Attendance.create({
       staff: staffId,
       checkIn: new Date(),
       date: new Date(),
       status: 'present',
-      notes
+      notes,
+      sessionId: new mongoose.Types.ObjectId().toString(),
+      isActive: true
     });
 
     await attendance.populate('staff', 'firstName lastName username');
 
+    console.log('Check-in successful for staff:', staffId);
     res.status(201).json({
       message: 'Checked in successfully',
       attendance
     });
   } catch (error) {
+    console.error('Check-in error:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -55,14 +72,19 @@ exports.checkOut = async (req, res) => {
     const attendance = await Attendance.findOne({
       staff: staffId,
       date: { $gte: today },
-      checkOut: null
+      checkOut: null,
+      isActive: true
     });
 
     if (!attendance) {
-      return res.status(404).json({ message: 'No active check-in found' });
+      return res.status(200).json({ 
+        message: 'No active check-in found',
+        success: false 
+      });
     }
 
     attendance.checkOut = new Date();
+    attendance.isActive = false; // Mark session as inactive
     
     // Calculate hours worked
     const hoursWorked = (attendance.checkOut - attendance.checkIn) / (1000 * 60 * 60);
@@ -90,6 +112,31 @@ exports.getStaffAttendance = async (req, res) => {
   try {
     // Get staffId from params or user
     const staffId = req.params.staffId || req.user.userId;
+    const { startDate, endDate } = req.query;
+
+    const query = { staff: staffId };
+    
+    if (startDate && endDate) {
+      query.date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
+    const attendance = await Attendance.find(query)
+      .populate('staff', 'firstName lastName username')
+      .sort({ date: -1 });
+
+    res.json({ attendance });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get my own attendance (simplified version)
+exports.getMyAttendance = async (req, res) => {
+  try {
+    const staffId = req.user.userId;
     const { startDate, endDate } = req.query;
 
     const query = { staff: staffId };
@@ -170,6 +217,51 @@ exports.getMonthlySummary = async (req, res) => {
 
     res.json({ summary });
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Auto checkout on logout
+exports.autoCheckOut = async (req, res) => {
+  try {
+    const { staffId } = req.body;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const attendance = await Attendance.findOne({
+      staff: staffId,
+      date: { $gte: today },
+      checkOut: null,
+      isActive: true
+    });
+
+    if (!attendance) {
+      return res.status(200).json({ 
+        message: 'No active check-in found to checkout',
+        success: true 
+      });
+    }
+
+    attendance.checkOut = new Date();
+    attendance.isActive = false; // Mark session as inactive
+    
+    // Calculate hours worked
+    const hoursWorked = (attendance.checkOut - attendance.checkIn) / (1000 * 60 * 60);
+    attendance.hoursWorked = Math.round(hoursWorked * 10) / 10;
+
+    // Calculate overtime (assuming 8 hours is standard day)
+    if (hoursWorked > 8) {
+      attendance.overtime = Math.round((hoursWorked - 8) * 10) / 10;
+    }
+
+    await attendance.save();
+
+    res.json({
+      message: 'Auto checkout successful',
+      attendance
+    });
+  } catch (error) {
+    console.error('Auto checkout error:', error);
     res.status(500).json({ message: error.message });
   }
 };
