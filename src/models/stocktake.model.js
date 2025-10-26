@@ -8,6 +8,7 @@ const stocktakeSchema = new mongoose.Schema({
   countedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Staff" },
   date: { type: Date, default: Date.now },
   confirmed: { type: Boolean, default: false },
+  reason: { type: String, default: "" },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Stocktake", stocktakeSchema); 

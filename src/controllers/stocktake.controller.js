@@ -1,6 +1,7 @@
 const Stocktake = require("../models/stocktake.model");
 const Product = require("../models/product.model");
 const InventoryTransaction = require("../models/inventory-transaction.model");
+const StocktakeExportService = require("../services/stocktake-export.service");
 
 exports.submitStocktake = async (req, res) => {
   try {
@@ -21,9 +22,72 @@ exports.submitStocktake = async (req, res) => {
       countedBy,
       date: new Date(),
       confirmed: false,
+      reason: reason || "",
     });
     await stocktake.save();
     res.status(201).json(stocktake);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.submitBulkStocktake = async (req, res) => {
+  try {
+    const { stocktakes } = req.body;
+    if (!Array.isArray(stocktakes) || stocktakes.length === 0) {
+      return res.status(400).json({ error: "Stocktakes array is required and cannot be empty." });
+    }
+
+    const results = [];
+    const errors = [];
+
+    for (const stocktakeData of stocktakes) {
+      try {
+        const { productId, counted, countedBy, reason } = stocktakeData;
+        
+        if (counted < 0) {
+          errors.push({ productId, error: "Counted stock cannot be negative." });
+          continue;
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+          errors.push({ productId, error: "Product not found" });
+          continue;
+        }
+
+        const discrepancy = counted - product.stock;
+        
+        // Require a reason if there is a discrepancy
+        if (discrepancy !== 0 && (!reason || reason.trim() === "")) {
+          errors.push({ productId, error: "A reason is required for discrepancies." });
+          continue;
+        }
+
+        const stocktake = new Stocktake({
+          product: productId,
+          counted,
+          system: product.stock,
+          discrepancy,
+          countedBy,
+          date: new Date(),
+          confirmed: false,
+          reason: reason || "",
+        });
+        
+        await stocktake.save();
+        results.push(stocktake);
+      } catch (error) {
+        errors.push({ productId: stocktakeData.productId, error: error.message });
+      }
+    }
+
+    res.status(201).json({
+      success: results.length,
+      errors: errors.length,
+      results,
+      errors
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -72,5 +136,42 @@ exports.confirmAdjustment = async (req, res) => {
     res.status(200).json(stocktake);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+exports.exportStocktake = async (req, res) => {
+  try {
+    const { stocktakeIds, format = 'pdf' } = req.body;
+    
+    console.log('Export controller - received:', { stocktakeIds, format });
+    
+    if (!stocktakeIds || !Array.isArray(stocktakeIds) || stocktakeIds.length === 0) {
+      return res.status(400).json({ error: "Stocktake IDs are required" });
+    }
+
+    if (!['pdf', 'xlsx'].includes(format)) {
+      return res.status(400).json({ error: "Format must be 'pdf' or 'xlsx'" });
+    }
+
+    const fileBuffer = await StocktakeExportService.generateStocktakeReport(stocktakeIds, format);
+    
+    console.log('Export controller - fileBuffer type:', typeof fileBuffer);
+    console.log('Export controller - fileBuffer length:', fileBuffer ? fileBuffer.length : 'undefined');
+    
+    if (!fileBuffer || fileBuffer.length === undefined) {
+      throw new Error('Export service returned invalid buffer');
+    }
+    
+    const filename = `stocktake-report-${new Date().toISOString().split('T')[0]}.${format}`;
+    const contentType = format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', fileBuffer.length);
+    
+    res.send(fileBuffer);
+  } catch (error) {
+    console.error('Export controller error:', error);
+    res.status(500).json({ error: error.message });
   }
 }; 

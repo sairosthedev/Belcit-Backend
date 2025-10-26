@@ -2,14 +2,21 @@ const Sale = require("../models/sale.model");
 const Product = require("../models/product.model");
 const Expense = require("../models/expense.model");
 
+
 // Profit/Loss report
 exports.profitLoss = async (req, res) => {
   try {
     const { start, end } = req.query;
     const match = {};
     if (start && end) {
-      match.date = { $gte: new Date(start), $lte: new Date(end) };
+      // Ensure we include the full end date by setting time to end of day
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      endDate.setHours(23, 59, 59, 999);
+      
+      match.date = { $gte: startDate, $lte: endDate };
     }
+    
     // Total sales revenue
     const sales = await Sale.aggregate([
       { $match: match },
@@ -159,7 +166,11 @@ exports.topProducts = async (req, res) => {
     const { start, end, limit = 5 } = req.query;
     const match = {};
     if (start && end) {
-      match.date = { $gte: new Date(start), $lte: new Date(end) };
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      endDate.setHours(23, 59, 59, 999);
+      
+      match.date = { $gte: startDate, $lte: endDate };
     }
     // Aggregate sales by product
     const top = await Sale.aggregate([
@@ -191,6 +202,7 @@ exports.topProducts = async (req, res) => {
         }
       }
     ]);
+    
     res.json(top);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -203,7 +215,11 @@ exports.salesOverTime = async (req, res) => {
     const { start, end } = req.query;
     const match = {};
     if (start && end) {
-      match.date = { $gte: new Date(start), $lte: new Date(end) };
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      endDate.setHours(23, 59, 59, 999);
+      
+      match.date = { $gte: startDate, $lte: endDate };
     }
     const sales = await Sale.aggregate([
       { $match: match },
@@ -215,6 +231,7 @@ exports.salesOverTime = async (req, res) => {
       },
       { $sort: { _id: 1 } }
     ]);
+    
     res.json(sales.map(d => ({ date: d._id, sales: d.sales })));
   } catch (error) {
     res.status(500).json({ error: error.message });

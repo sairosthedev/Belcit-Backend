@@ -5,6 +5,8 @@ const auth = require("../middleware/auth.middleware");
 const ROLES = require("../config/roles");
 
 router.post("/", auth([ROLES.STOCK_CLERK, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), stocktakeController.submitStocktake);
+router.post("/bulk", auth([ROLES.STOCK_CLERK, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), stocktakeController.submitBulkStocktake);
+router.post("/export", auth([ROLES.STOCK_CLERK, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), stocktakeController.exportStocktake);
 router.get("/", auth([ROLES.STOCK_CLERK, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), stocktakeController.getStocktakes);
 router.get("/discrepancies", auth([ROLES.STOCK_CLERK, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), stocktakeController.getDiscrepancies);
 router.post("/:id/confirm", auth([ROLES.STOCK_CLERK, ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]), stocktakeController.confirmAdjustment);
